@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中国报晚宴座位查询</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f5f5;
+}
+
+.banner{
+    width:100%;
+    display:block;
+}
+
+.container{
+    max-width:900px;
+    margin:20px auto;
+    background:white;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 5px 20px rgba(0,0,0,.15);
+}
+
+.content{
+    padding:30px;
+    text-align:center;
+}
+
+h1{
+    margin:10px 0;
+}
+
+input{
+    width:90%;
+    max-width:600px;
+    padding:15px;
+    font-size:22px;
+    border:2px solid #ddd;
+    border-radius:10px;
+}
+
+.result{
+    margin-top:25px;
+}
+
+.card{
+    margin-top:20px;
+    padding:20px;
+    background:#fafafa;
+    border-radius:15px;
+}
+
+.name{
+    font-size:28px;
+    font-weight:bold;
+}
+
+.table{
+    font-size:70px;
+    font-weight:bold;
+    color:#c62828;
+}
+
+.loading{
+    color:#666;
+    margin-top:10px;
+}
+
+@media(max-width:768px){
+    .table{
+        font-size:50px;
+    }
+
+    .name{
+        font-size:22px;
+    }
+
+    input{
+        font-size:18px;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<img class="banner"
+src="https://drive.google.com/thumbnail?id=16pHh9VD2JQOsM8HzAXKyAqmb3AQ0UIcb&sz=w2000">
+
+<div class="content">
+
+<h1>中国报晚宴座位查询</h1>
+
+<input
+id="keyword"
+placeholder="请输入姓名 / Enter Name">
+
+<div id="status" class="loading">
+Loading data...
+</div>
+
+<div id="result" class="result"></div>
+
+</div>
+
+</div>
+
+<script>
+
+const CSV_URL =
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTM_KtuEXBoOYLuh8DZR9AVyer2d4NBx46tpJDOe6XIkF6dxcfMcFATXR4RemY3XMXY9FMedZsD4i72/pub?gid=1058260015&single=true&output=csv";
+
+let data=[];
+
+fetch(CSV_URL)
+.then(r=>r.text())
+.then(csv=>{
+
+    const rows=csv.trim().split("\n");
+
+    data=rows.slice(1).map(row=>{
+
+        const cols=row.split(",");
+
+        return{
+            nama:(cols[0]||"").trim(),
+            meja:(cols[1]||"").trim()
+        };
+
+    });
+
+    document.getElementById("status").innerHTML=
+    "Data Loaded";
+
+});
+
+document
+.getElementById("keyword")
+.addEventListener("input",function(){
+
+    const keyword=this.value
+    .toLowerCase()
+    .trim();
+
+    const result=document
+    .getElementById("result");
+
+    if(keyword===""){
+        result.innerHTML="";
+        return;
+    }
+
+    const found=data.filter(item=>
+        item.nama.toLowerCase()
+        .includes(keyword)
+    );
+
+    if(found.length===0){
+
+        result.innerHTML=
+        "<h3>查无资料 / Name Not Found</h3>";
+
+        return;
+    }
+
+    result.innerHTML=
+    found.map(item=>`
+        <div class="card">
+            <div class="name">${item.nama}</div>
+            <div>TABLE NO</div>
+            <div class="table">${item.meja}</div>
+        </div>
+    `).join("");
+
+});
+
+</script>
+
+</body>
+</html>
